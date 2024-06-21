@@ -61,10 +61,18 @@ app.get('/', (request, response) => {
 })
 
 app.post('/posts',(request,response) => {
-    response.json({
-        ...request.body,
-        id: posts.length + 1,
-    });
+    posts.push(
+        {
+            ...request.body,
+            id: posts.length + 1,
+        }
+    );
+    response.json(
+        {
+            ...request.body,
+            id: posts.length + 1,
+        }
+    );
 })
 
 //3. run the server
