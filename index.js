@@ -5,6 +5,7 @@ const exxpress = require('express');
 const app = exxpress();
 
 //4. create a route
+//response.send-> to send a string
 app.get('/', (request, response) => {
     response.send('Hello Node.js');
 })
