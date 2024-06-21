@@ -46,15 +46,25 @@ const posts = [
       }
 ]
 //1. import express module
-const exxpress = require('express');
+const express = require('express');
 
 // 2. Create an Express app
-const app = exxpress();
+const app = express();
+
+//5. middleware
+app.use(express.json());
 
 //4. create a route
 //response.send-> to send a string
 app.get('/', (request, response) => {
     response.json(posts);
+})
+
+app.post('/posts',(request,response) => {
+    response.json({
+        ...request.body,
+        id: posts.length + 1,
+    });
 })
 
 //3. run the server
