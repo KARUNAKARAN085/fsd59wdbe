@@ -6,7 +6,7 @@ const app = exxpress();
 
 //4. create a route
 app.get('/', (request, response) => {
-    response.send('Hello World!');
+    response.send('Hello Node.js');
 })
 
 //3. run the server
