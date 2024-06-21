@@ -1,0 +1,23 @@
+{
+  "name": "fsd59wdbe",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KARUNAKARAN085/fsd59wdbe.git"
+  },
+  "author": "karunakaran",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/KARUNAKARAN085/fsd59wdbe/issues"
+  },
+  "homepage": "https://github.com/KARUNAKARAN085/fsd59wdbe#readme",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
