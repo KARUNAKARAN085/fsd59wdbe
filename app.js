@@ -13,7 +13,6 @@ module.exports = app;
 
 
 
-
 // app.get('/posts', (request, response) => {
 //     response.json(posts);
 // })
