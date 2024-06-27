@@ -107,6 +107,46 @@ const userController ={
         } catch(error){
             response.status(500).json({message: error.message});
         }
+    },
+    updateuser: async (request,response) =>{
+        try{
+            //get the user id from the request body
+            const userId = request.params.id;
+            //get the details to update from the request body
+            const {name, email} = request.body;
+            //check if the user exists in the db
+            const user = await User.findById(userId);
+            //check if the user exists in the db
+            if(!user){
+                return response.status(404).send({message: 'User not found'});
+            }
+            
+            if(name) user.name= name;
+            if(email) user.email= email;
+            //save the updated user
+            const updatedUser = await user.save();
+            response.status(200).json({message: 'User updated successfully', updatedUser});
+        } catch(error){
+            response.status(500).json({message: error.message});
+        }
+    },
+    deleteuser: async (request,response) =>{
+        try{
+            //get the user id from the request body
+            const userId = request.params.id;
+            //check if the user exists in the db
+            const user = await User.findById(userId);
+            //check if the user exists in the db
+            if(!user){
+                return response.status(404).send({message: 'User not found'});
+            }
+            //delete the user from the DB
+            await User.findOneAndDelete(userId);
+
+            response.status(200).send({ message: 'User deleted successfully' });
+        } catch(error){
+            response.status(500).json({message: error.message});
+        }
     }
 }
 module.exports = userController;
