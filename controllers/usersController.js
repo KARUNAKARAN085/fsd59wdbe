@@ -147,6 +147,20 @@ const userController ={
         } catch(error){
             response.status(500).json({message: error.message});
         }
+    },
+    getProfile: async (request,response) =>{
+        try {
+            //get the user id from the request object
+            const userId = request.userId;
+            //find the user by id from the db
+            const user = await User.findById(userId).select('-password -__v -_id');
+            if(!user) {
+                return response.status(404).send({message: 'User not found'});
+            }
+            response.status(200).json({message: 'User profile ', user});
+        } catch (error) {
+            
+        }
     }
 }
 module.exports = userController;
