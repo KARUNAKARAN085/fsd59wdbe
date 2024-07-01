@@ -11,6 +11,10 @@ userRouter.post('/login',userController.login);
 //private routes
 userRouter.get('/', auth.verifyToken, userController.getAllUsers);
 userRouter.get('/logout', auth.verifyToken, userController.logout);
+
+userRouter.get('/profile', auth.verifyToken, userController.getProfile);
+
+
 userRouter.get('/:id',auth.verifyToken, userController.getUserById);
 userRouter.put('/:id',auth.verifyToken, userController.updateuser);
 userRouter.delete('/:id',auth.verifyToken, userController.deleteuser);

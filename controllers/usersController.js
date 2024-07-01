@@ -92,7 +92,6 @@ const userController ={
 
             response.status(200).json({
                 message: 'Logged in successfully',
-                token
             });
         }
         catch(error){
@@ -157,7 +156,7 @@ const userController ={
             if(!user) {
                 return response.status(404).send({message: 'User not found'});
             }
-            response.status(200).json({message: 'User profile ', user});
+            response.status(200).json({message: 'User profile', user});
         } catch (error) {
             
         }

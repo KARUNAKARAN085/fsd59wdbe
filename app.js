@@ -9,7 +9,12 @@ const morgan = require('morgan');
 const app = express();
 
 // enable cors
-app.use(cors());
+app.use(cors(
+    {
+        origin: 'http://localhost:5173',
+        credentials: true
+    }
+));
 
 // enable morgan
 app.use(morgan('dev'));
