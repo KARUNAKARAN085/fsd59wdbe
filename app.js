@@ -8,6 +8,9 @@ const morgan = require('morgan');
 
 const app = express();
 
+//parse the cookies of the request
+app.use(cookieParser());
+
 // enable cors
 app.use(cors(
     {
@@ -18,9 +21,6 @@ app.use(cors(
 
 // enable morgan
 app.use(morgan('dev'));
-
-//parse the cookies of the request
-app.use(cookieParser());
 
 //parse the request body
 app.use(express.json());
