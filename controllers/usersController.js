@@ -1,85 +1,102 @@
-const { request, response } = require('express');
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { SECRET_KEY } = require('../utils/config');
 
-// define the controller for the user
-const userController ={
+// define the contoller for the user
+const userController = {
     getAllUsers: async (request, response) => {
-        try{
+        try {
+            const { email } = request.query;
+
+            if (email) {
+                // find the user by email
+                const user = await User.findOne({ email });
+
+                if (!user) {
+                    return response.status(404).send({ message: 'User not found' });
+                }
+
+                return response.status(200).json(user);
+            }
+
+            // if no query parameters are provided, return all users
             const users = await User.find();
             response.status(200).json(users);
-        } catch(error){
-            response.status(500).json({message: error.message});
+        } catch (error) {
+            response.status(500).send({ message: error.message });
         }
     },
+    register: async (request, response) => {
+        try {
+            // get the user inputs from the request body
+            const { name, email, password } = request.body;
 
-    register: async (request,response) =>{
-        try{
-            //get the user inputs from the request body
-            const {name,email,password} = request.body;
+            // check if the user already exists in the database with same email
+            const user = await User.findOne({ email });
 
-            //check if the user already exists
-            const existingUser = await User.findOne({email});
-
-            // if the user already exist return error
-            if(existingUser){
-                return response.status(400).send({message: 'User already exists'});
+            // if the user exists, return an error response
+            if (user) {
+                return response.status(400).send({ message: 'User already exists' });
             }
-            
-            //hash the password
+
+            // hash the password
             const hashedPassword = await bcrypt.hash(password, 10);
 
-            //create an new user
-            const newUser = new User({name, email, password: hashedPassword});
+            // create a new user
+            const newUser = new User({ name, email, password: hashedPassword });
 
-            //save the user
+            // save the user
             const savedUser = await newUser.save();
 
-            await newUser.save();
             response.status(201).send({
                 message: 'User created successfully',
                 user: savedUser
             });
-        }
-        catch(error){
-            response.status(500).json({message: error.message});
+        } catch (error) {
+            response.status(500).send({ message: error.message });
         }
     },
-    getUserById: async (request,response) => {
-        try{
-            // getthe user id from the request perameter
-            const id = request.params.id;
-            const user = await User.findById(id);
-            if(!user){
-                return response.status(404).send({message: 'User not found'});
+    getUserById: async (request, response) => {
+        try {
+            // get the user id from the request parameters
+            const userId = request.params.id;
+
+            // find the user by id
+            const user = await User.findById(userId);
+
+            if (!user) {
+                return response.status(404).send({ message: 'User not found' });
             }
+
             response.status(200).json(user);
-
-        }
-        catch(error){
-            response.status(500).json({message: error.message});
+        } catch (error) {
+            response.status(500).send({ message: error.message });
         }
     },
-    login: async (request, response) =>{
-        try{
-            //get the user inputs from the request body
-            const {email,password} = request.body;
 
-            //check if the user exists in the db
-            const user = await User.findOne({email});
+    login: async (request, response) => {
+        try {
+            // get the user email and password from the request body
+            const { email, password } = request.body;
 
-            if(!user){
-                return response.status(404).send({message: 'User not found'});
+            // check if the user exists in the database
+            const user = await User.findOne({ email });
+
+            // if the user does not exist, return an error response
+            if (!user) {
+                return response.status(404).send({ message: 'User not found' });
             }
-            //check if the password is correct
-            const isMatch = await bcrypt.compare(password, user.password);
-            //if password is incorrect return error
-            if(!isMatch){
-                return response.status(400).send({message: 'Invalid password'});
+
+            // if the user exists, compare the password
+            const isPasswordValid = await bcrypt.compare(password, user.password);
+
+            // if the password is invalid, return an error response
+            if(!isPasswordValid) {
+                return response.status(400).send({ message: 'Invalid password' });
             }
-            // generate a jwt token
+
+            // generate a JWT token
             const token = jwt.sign({ id: user._id }, SECRET_KEY);
 
             // set a cookie with the token
@@ -87,76 +104,90 @@ const userController ={
                 httpOnly: true,
                 secure: true,
                 sameSite: 'none',
-                expires: new Date(Date.now() + 24 * 3600000)// 24 hours from login
-                });
-
-            response.status(200).json({
-                message: 'Logged in successfully',
+                expires: new Date(Date.now() + 24 * 3600000) // 24 hours from login
             });
-        }
-        catch(error){
-            response.status(500).json({message: error.message});
+
+            response.status(200).json({ message: 'Login successful' });
+        } catch (error) {
+            response.status(500).send({ message: error.message });
         }
     },
-    logout: async (request,response) =>{
-        try{
-            //clear the cookie
+
+    logout: async (request, response) => {
+        try {
+            // clear the cookie
             response.clearCookie('token');
-            response.status(200).json({message: 'Logged out successfully'});
-        } catch(error){
-            response.status(500).json({message: error.message});
+
+            response.status(200).send({ message: 'Logged out successfully' });
+        } catch (error) {
+            response.status(500).send({ message: error.message });
         }
     },
-    updateuser: async (request,response) =>{
-        try{
-            //get the user id from the request body
+
+    updateUser: async (request, response) => {
+        try {
+            // get the user id from the request parameters
             const userId = request.params.id;
-            //get the details to update from the request body
-            const {name, email} = request.body;
-            //check if the user exists in the db
+
+            // get the details to update from the request body
+            const { name, email } = request.body;
+
+            // find the user by id from the database
             const user = await User.findById(userId);
-            //check if the user exists in the db
-            if(!user){
-                return response.status(404).send({message: 'User not found'});
+
+            // if the user does not exist, return an error response
+            if (!user) {
+                return response.status(404).send({ message: 'User not found' });
             }
-            
-            if(name) user.name= name;
-            if(email) user.email= email;
-            //save the updated user
+
+            // update the user details if they are provided and if the user exists
+            if (name) user.name = name;
+            if (email) user.email = email;
+
+            // save the updated user details to the database
             const updatedUser = await user.save();
-            response.status(200).json({message: 'User updated successfully', updatedUser});
-        } catch(error){
-            response.status(500).json({message: error.message});
+
+            response.status(200).json({ message: 'User updated successfully', user: updatedUser });
+        } catch (error) {
+            response.status(500).send({ message: error.message });
         }
-    },
-    deleteuser: async (request,response) =>{
-        try{
-            //get the user id from the request body
+    }, 
+
+    deleteUser: async (request, response) => {
+        try {
+            // get the user id from the request parameters
             const userId = request.params.id;
-            //check if the user exists in the db
+
+            // find the user by id from the database
             const user = await User.findById(userId);
-            //check if the user exists in the db
-            if(!user){
-                return response.status(404).send({message: 'User not found'});
+
+            // if the user does not exist, return an error response
+            if (!user) {
+                return response.status(404).send({ message: 'User not found' });
             }
-            //delete the user from the DB
-            await User.findOneAndDelete(userId);
+
+            // delete the user from the database
+            await User.findByIdAndDelete(userId);
 
             response.status(200).send({ message: 'User deleted successfully' });
-        } catch(error){
-            response.status(500).json({message: error.message});
+        } catch (error) {
+            response.status(500).send({ message: error.message });
         }
     },
-    getProfile: async (request,response) =>{
+    getProfile: async (request, response) => {
         try {
-            //get the user id from the request object
+            // get the user id from the request object
             const userId = request.userId;
-            //find the user by id from the db
+
+            // find the user by id from the database
             const user = await User.findById(userId).select('-password -__v -_id');
-            if(!user) {
-                return response.status(404).send({message: 'User not found'});
+
+            // if the user does not exist, return an error response
+            if (!user) {
+                return response.status(404).send({ message: 'User not found' });
             }
-            response.status(200).json({message: 'User profile', user});
+
+            response.status(200).json({ message: 'User profile', user });
         } catch (error) {
             response.status(500).send({ message: error.message });
         }
@@ -188,6 +219,29 @@ const userController ={
         } catch (error) {
             response.status(500).send({ message: error.message });
         }
+    },
+    // set the profile picture
+    setProfilePicture: async (req, res) => {
+        try {
+            if (!req.file) {
+                return res.status(400).json({ error: 'No file uploaded' });
+            }
+
+            const userId = req.userId;
+            const profilePicture = req.file.path;
+
+            const user = await User.findByIdAndUpdate(userId, { profilePicture }, { new: true });
+
+            if (!user) {
+                return res.status(404).json({ error: 'User not found' });
+            }
+
+            res.status(200).json({ user });
+        } catch (error) {
+            console.error('Error updating profile picture:', error);
+            res.status(500).json({ error: 'Failed to update profile picture' });
+        }
     }
 }
+
 module.exports = userController;

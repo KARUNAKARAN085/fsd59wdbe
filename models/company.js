@@ -9,13 +9,17 @@ const companySchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['active','inactive'],
+        enum: ['active', 'inactive'],
         default: 'active'
     },
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
-    }
+    },
+    jobs: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Job'
+    }]
 });
 
-module.exports = mongoose.model('Company',companySchema, 'companies');
+module.exports = mongoose.model('Company', companySchema, 'companies');
