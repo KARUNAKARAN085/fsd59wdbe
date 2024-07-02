@@ -7,6 +7,8 @@ const auth = require('../middleware/auth');
 //private routes
 companyRouter.post('/users/:userId/companies', auth.verifyToken, companyController.addCompany);
 //public routes
-companyRouter.get('/companies', companyController.getAllCompanies);
+companyRouter.get('/', companyController.getAllCompanies);
+
+companyRouter.post('/', auth.verifyToken, auth.isAdmin, companyController.addCompany);
 
 module.exports = companyRouter;
